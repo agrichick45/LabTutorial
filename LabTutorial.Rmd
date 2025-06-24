@@ -20,7 +20,7 @@ library(terra)
 library(tidyterra)
 library(gridExtra)
 library(ggpubr)
-
+library(geodata)
 ```
 
 # Vector Data
@@ -382,27 +382,25 @@ Raster data represents information as a grid of tiny squares called pixels. They
 
 ## Raster Processing
 
-These two sections are included for background on processing a raster down to size, since the scale of the FAO dataset is too large to load into github. There are lines further down the document for The soil carbon data was taken from the [FAO GLOSIS v 1.5](https://data.apps.fao.org/glosis/?lang=en) dataset. 
+The geodata package is a very diverse package that allows for the deployment of many different types of earth science data. 
 
 ```{r}
 
 # Read the .tif  as a SpatRaster
-FAOGlosis<-rast("FAOGlosisv1.5.tif")
+SG_2020<-soil_world_vsi(var="ocs", depth=30)
 
-FAOGlosis
 ```
-This data is a global spatraster with  18544 x 43200. And the resolution is the WGS84. WGS84 is the global standard, particularly associated with GPS units. with a cell grid size of  0.008333333 x 0.008333333 degrees.  In order to use the data with our existing agricultural dataset, we have to project the raster into the same coordinate reference system as the agricultural shapefile. We do this using project(from, to). Then we crop and mask the function of the global soil map to the extent of the shapefile. This makes sure the area of the global map and clip it to the ag_data1 file. 
+
+This data is a global spatraster with  58034 x 159246 cells of a 250 m x 250 m resolution. And the resolution is the Interrupted Goode Homolosine. In order to use the data with our existing agricultural dataset, we have to project the raster into the same coordinate reference system as the agricultural shapefile. We do this using project(from, to). Then we crop and mask the function of the global soil map to the extent of the shapefile. This makes sure the area of the global map and clip it to the ag_data1 file. 
 
 ```{r}
-#Project the ag_data from the NAD 83 into the FAOGlosis WGS84 Dataset project(from, to)
-ag_data1<-project(ag_data, FAOGlosis)
+#Project the ag_data from the NAD 83 into the SG_2020 IGH Dataset project(from, to)
+ag_data1<-project(ag_data, SG_2020)
 
 #The crop function cuts the FAO glosis map to the ag_data1 area. Mask =  True cuts away the excess. 
 #Remove this function and see what it does! 
-MS_Area<-crop(FAOGlosis, ag_data1, mask=TRUE)
+MS_Area<-crop(SG_2020, ag_data1, mask=TRUE)
 
-#Write the raster into the folder it needs to be in.
-writeRaster(MS_Area, "clipped_FAO_SOC.tif", overwrite=TRUE)
 ```
 
 This is where we pick up the project, with the clipped Soil Carbon FAO file using the raster. When we check the projection, we can see the area is down to 2454 x 2007 pixels, that are 1 layer deep, and that we have the WGS84 Coordinate reference system.  
