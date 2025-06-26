@@ -1,8 +1,8 @@
 ---
 title: "Tutorial"
 author: "Mandy Liesch"
-date: "2025-06-18"
 output: html_document
+code_folding: show
 ---
 
 ```{r setup, include=FALSE}
@@ -11,7 +11,29 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
-Load the required packages
+# Packages
+
+## Data Downloading
+
+`geodata` : The [geodata](https://github.com/rspatial/geodata) package has functions for downloading of geographic data for use in spatial analysis and mapping. The package facilitates access to climate, crops, elevation, land use, soil, species occurrence, accessibility, administrative boundaries and other data.
+
+`tigris` : The [tigris](https://github.com/walkerke/tigris) package allows for the downloading of spatial data at several geographic scales, including states and counties (shown here).
+
+## Geoprocessing
+
+`terra` : The [terra](https://rspatial.org/pkg/#google_vignette) package allows for methods for spatial data analysis with vector (points, lines, polygons) and raster (grid) data. This package is faster than the raster package. 
+
+`tidyterra` : The [tidyterra](https://dieghernan.github.io/tidyterra/reference/ggspatvector.html) package provides functions designed to seamlessly integrate terra objects (like SpatVector) with ggplot2. 
+
+## Display
+
+`ggpubr` the [ggpubr](https://rpkgs.datanovia.com/ggpubr/) package provides some easy-to-use functions for creating and customizing 'ggplot2'- based plots creating publication ready plots.
+
+`gridExtra` the [gridExtra](https://cran.r-project.org/web/packages/gridExtra/vignettes/arrangeGrob.html) package allows for the display of plots side by side. 
+
+`tidyverse` the [tidyverse](https://www.tidyverse.org/) package is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures.
+
+
 
 ```{r, include=FALSE}
 library(tigris)
@@ -21,6 +43,8 @@ library(tidyterra)
 library(gridExtra)
 library(ggpubr)
 library(geodata)
+
+
 ```
 
 # Vector Data
@@ -29,9 +53,12 @@ Vector Data is commonly used at its original resolution, like most traditional m
 
 ## Shapefiles
 
-The tigris package allows for the downloading of spatial data at several geographic scales, including states and counties (shown here). There are 3233 county polygons and 9 data fields in the intial tigris file. However, the state vector (using State FIPS), narrows the states to ones that are in the Mississippi/Ohio River Basin. We are looking at a 12 state area that make up the bulk of these basins
+There are 3233 county polygons and 9 data fields in the intial tigris file. However, the state vector (using State FIPS), narrows the states to ones that are in the Mississippi/Ohio River Basin. We are looking at a 12 state area that make up the bulk of these basins.
 
 ```{r echo=T, results='hide'}
+#Set the option to remove scientific notation from displays
+options(scipen=10000)
+
 #Create a vector with the state FIPS that we need to extract. 
 states<-c("5", "17", "18", "19", "21", "22", "27","28",  "29", "39", "47", "55")
 
@@ -84,19 +111,19 @@ Most of these shapefiles can be merged with datafiles and spreadsheets to expand
 
 Almost all federal agencies have large respositories of data that anyone can access, via downloads of spreadsheet files (or .csv) that can be used for mapping with shapefiles. 
 
-[Atlas of Rural Towns (USDA ERS)](https://www.ers.usda.gov/data-products/atlas-of-rural-and-small-town-america): 
+[Atlas of Rural Towns (USDA ERS)](https://www.ers.usda.gov/data-products/atlas-of-rural-and-small-town-america): Focused on statistical metrics for Rural America, including People, Jobs, Classification, Incomes and Veteran based data. 
 
-[USDA ERS Data](https://www.ers.usda.gov/data-products)
+[USDA ERS Data](https://www.ers.usda.gov/data-products):  ERS has a huge amount of data covering key information about the farm and food sectors, including agricultural markets and trade, farming and farm income, food prices and consumption, food security and nutrition assistance, rural economies, and the interaction of agriculture and natural resources.
 
-[CDC Wonder](https://wonder.cdc.gov/): 
+[CDC Wonder](https://wonder.cdc.gov/): It provides access to a wide array of public health data for researchers, public health professionals, and the general public. CDC WONDER offers various online databases containing information on births, deaths, cancer, STDs, TB, and more.
 
-[National Agricultural Statistics Service](https://quickstats.nass.usda.gov/): 
+[National Agricultural Statistics Service](https://quickstats.nass.usda.gov/): Conducts hundreds of surveys every year and prepares reports covering virtually every aspect of U.S. agriculture. This includes the Census of Agriculture, published every 5 years. Production and supplies of food and fiber, prices paid and received by farmers, farm labor and wages, farm finances, chemical use, and changes in the demographics of U.S. producers are only a few examples. 
 
-[Census Bureau](https://www.census.gov/data.html): 
+[Census Bureau](https://www.census.gov/data.html): A huge source of data, including the American Community Surveys, and the census taken every 10 years. If you need data on demographics, economics, and all things socio-demographic.
 
-[Bureau of Labor Statistics](https://www.bls.gov/data/):
+[Bureau of Labor Statistics](https://www.bls.gov/data/):  It is the principal fact-finding agency in the broad field of labor economics and statistics and serves as part of the U.S. Federal Statistical System. BLS collects, calculates, analyzes, and publishes data essential to the public, employers, researchers, and government organizations.
 
-[NRCS Geospatial Data Gateway](https://datagateway.nrcs.usda.gov/):
+
 
 ## Datafile
 
@@ -105,9 +132,6 @@ For these shapefiles, we are utilizing a .csv file that was curated from the NAS
 ```{r}
 #Load the data frame
 NASS2017<-read.csv("NASS2017_Snapshot.csv")
-
-#Observe the data
-View(NASS2017)
 
 #Make sure that all columns have 5 numbers 
 NASS2017$FIPS<-sprintf("%05d", NASS2017$FIPS)
@@ -119,59 +143,59 @@ head(NASS2017)
 
 There are 1,090 counties in this area, and 27 columns of data involving crop and agricultural production data. 
 
-FIPS: Federal code identifying counties 
+*FIPS:* Federal code identifying counties 
 
-Market_Value: Total Agricultural Market Value in the County in dollars
+*Market_Value:* Total Agricultural Market Value in the County in dollars
 
-Per_Crop_sales: Percentage of Agricultural Income Generated by Crop Production
+*Per_Crop_sales:* Percentage of Agricultural Income Generated by Crop Production
 
-Per_Grain_Mark_Val:  Percentage of Agricultural Income Generated by grain crops (Corn, soybean, etc.)
+*Per_Grain_Mark_Val:*  Percentage of Agricultural Income Generated by grain crops (Corn, soybean, etc.)
 
-Per_Cotton_Mark_Val:  Percentage of Agricultural Income Generated by cotton
+*Per_Cotton_Mark_Val:*  Percentage of Agricultural Income Generated by cotton
 
-Per_Other_Crop_Mark_Val: Percentage of Agricultural Income Generated by other crops (like oil crops, hops, etc)
+*Per_Other_Crop_Mark_Val:* Percentage of Agricultural Income Generated by other crops (like oil crops, hops, etc)
 
-Per_Veg_Sale_Mkt_Val: Percentage of Agricultural Income Generated by vegetables (carrots, cabbage, etc)
+*Per_Veg_Sale_Mkt_Val:* Percentage of Agricultural Income Generated by vegetables (carrots, cabbage, etc)
 
-Per_Fruit_Sales_Mkt_Val: Percentage of Agricultural Income Generated by fruits (melons, cranberries, blueberries, etc)
+*Per_Fruit_Sales_Mkt_Val:* Percentage of Agricultural Income Generated by fruits (melons, cranberries, blueberries, etc)
 
-Per_Nursery_Sales_Val:  Percentage of Agricultural Income Generated by nursery crops
+*Per_Nursery_Sales_Val:*  Percentage of Agricultural Income Generated by nursery crops
 
-Per_Cut_Tree_Sales_Val:  Percentage of Agricultural Income Generated by cut trees
+*Per_Cut_Tree_Sales_Val:*  Percentage of Agricultural Income Generated by cut trees
 
-Per_Ani_Sales_Mark_Val: Percentage of Agricultural Income Generated by Animal Production
+*Per_Ani_Sales_Mark_Val:* Percentage of Agricultural Income Generated by Animal Production
 
-Per_Poul_Sales_Mark_Val: Percentage of Agricultural Income Generated by Poultry Production (Turkey, Broilers, Eggs, etc.)
+*Per_Poul_Sales_Mark_Val:* Percentage of Agricultural Income Generated by Poultry Production (Turkey, Broilers, Eggs, etc.)
 
-Per_Milk_Sales_Mrk_Val: Percentage of Agricultural Income Generated by Milk and Milk products
+*Per_Milk_Sales_Mrk_Val:* Percentage of Agricultural Income Generated by Milk and Milk products
 
-Per_Cattle_Sales_Mrk_Val: Percentage of Agricultural Income Generated by live cattle sales
+*Per_Cattle_Sales_Mrk_Val:* Percentage of Agricultural Income Generated by live cattle sales
 
-Per_Hog_Sales_Mrk_Val: Percentage of Agricultural Income Generated by hog sales
+*Per_Hog_Sales_Mrk_Val:* Percentage of Agricultural Income Generated by hog sales
 
-Per_Sheep_Sales_Mrk_Val: Percentage of Agricultural Income Generated by sheep sales
+*Per_Sheep_Sales_Mrk_Val:* Percentage of Agricultural Income Generated by sheep sales
 
-PER_AQ_SALES: Percentage of Agricultural Income Generated by aquaculture sales
+*PER_AQ_SALES:* Percentage of Agricultural Income Generated by aquaculture sales
 
-PER_EQ_SALES: Percentage of Agricultural Income Generated by equine sales
+*PER_EQ_SALES:* Percentage of Agricultural Income Generated by equine sales
 
-PER_SP_AN_SALES: Percentage of Agricultural Income Generated by other animal sales
+*PER_SP_AN_SALES:* Percentage of Agricultural Income Generated by other animal sales
 
-Per_Cropland_Manure: Percentage of Agricultural Land with Manure application
+*Per_Cropland_Manure:* Percentage of Agricultural Land with Manure application
 
-Cattle_Operations: Number of Cattle Operations in the county
+*Cattle_Operations:* Number of Cattle Operations in the county
 
-Milk_Operations: Number of Milk Operations in the county
+*Milk_Operations:* Number of Milk Operations in the county
 
-Poul_Total_Oper: Number of Poultry Operations in the county
+*Poul_Total_Oper:* Number of Poultry Operations in the county
 
-Hog_Oper: Number of Hog Operations in the county
+*Hog_Oper:* Number of Hog Operations in the county
 
-TOT_SHEEP_Oper: Number of sheep Operations in the county
+*TOT_SHEEP_Oper:* Number of sheep Operations in the county
 
-EQUI_OPER: Number of horse Operations in the county
+*EQUI_OPER:* Number of horse Operations in the county
 
-TOT_AQUA_OPER: Number of Aquaculture Operations in the county
+*TOT_AQUA_OPER:* Number of Aquaculture Operations in the county
 
 In order to visualize this data, we need to merge this database with the shapefile. 
 
@@ -189,11 +213,7 @@ ag_data
 
 The file is now converted into a Spatvector, in the NAD83 reference system.
 
-
-
 ### Create a Map
-
-The [tidyterra](https://dieghernan.github.io/tidyterra/reference/ggspatvector.html) package provides functions designed to seamlessly integrate terra objects (like SpatVector) with ggplot2. 
 
 Use the Geom Spatvector function to graph the shapefile. The resulting file should be a blank shapefile. We need to add parameters to the ggplots to actually make meaningful maps. 
 
@@ -317,7 +337,7 @@ plot2
 
 ### Side by Side Plots 
 
-This using the [gridExtra](https://cran.r-project.org/web/packages/gridExtra/vignettes/arrangeGrob.html) package, we can arrange graphs to be side by side into rows or columns. This data is better suited for columns. So we can use the grid.arrange to plot several plots into the same area. 
+This using the gridExtra package, we can arrange graphs to be side by side into rows or columns. This data is better suited for columns. So we can use the grid.arrange to plot several plots into the same area. 
 
 ```{r}
 #Using the grid arrange, we can put the two plots together side by side
@@ -353,7 +373,8 @@ grid.arrange(crop_plot, plot2, leg, ncol=3,
 You can utilize the data existing in the data frame to create new columns for display as well! We have the total market value, and can use this to multiply by the percent sales to get total market values in the Poultry Industry, and then divide by total producers to get total farm size too! 
 
 ```{r}
-ag_data$Poultry_Per_Capita = (ag_data$MARKET_VALUE * ag_data$Per_Poul_Sales_Mark_Val) / ag_data$Poul_Total_Oper
+#Calculate the amount that poultry operations make per operator
+ag_data$Poultry_Per_Capita = (ag_data$MARKET_VALUE * (ag_data$Per_Poul_Sales_Mark_Val/100)) / ag_data$Poul_Total_Oper
 
 Poultry_Per_Capita<-ggplot() +
   #using the dataset, the fill = column can be changed to any of the above columns
@@ -362,9 +383,9 @@ Poultry_Per_Capita<-ggplot() +
   #Change the color scale using this options
     scale_fill_viridis_c(option = "magma", 
                          #Customize the Name of the Legend
-                         name = "$")  +
+                         name = "Dollars $") +
   #Customize the title based on your data
-  ggtitle("Per Capita Poultry Profitability") +
+  ggtitle("Per Capita Poultry Operation Income") +
   #You can put the legend in the center here, or leave it on the left (delete element text)
   #or right ((hjust =1))
   theme(plot.title = element_text(hjust=0.5), 
@@ -393,30 +414,27 @@ SG_2020<-soil_world_vsi(var="ocs", depth=30)
 
 This data is a global spatraster with  58034 x 159246 cells of a 250 m x 250 m resolution. And the resolution is the Interrupted Goode Homolosine. In order to use the data with our existing agricultural dataset, we have to project the raster into the same coordinate reference system as the agricultural shapefile. We do this using project(from, to). Then we crop and mask the function of the global soil map to the extent of the shapefile. This makes sure the area of the global map and clip it to the ag_data1 file. 
 
-```{r}
+```{r echo=T, results='hide'}
+
 #Project the ag_data from the NAD 83 into the SG_2020 IGH Dataset project(from, to)
 ag_data1<-project(ag_data, SG_2020)
 
 #The crop function cuts the FAO glosis map to the ag_data1 area. Mask =  True cuts away the excess. 
-#Remove this function and see what it does! 
-MS_Area<-crop(SG_2020, ag_data1, mask=TRUE)
+
+MS_Area<-crop(SG_2020, ag_data1, 
+              #Remove this function and see what it does! 
+              mask=TRUE)
+
+MS_Area
 
 ```
 
-This is where we pick up the project, with the clipped Soil Carbon FAO file using the raster. When we check the projection, we can see the area is down to 2454 x 2007 pixels, that are 1 layer deep, and that we have the WGS84 Coordinate reference system.  
-
-```{r}
-MS_area<-rast("clipped_FAO_SOC.tif")
-
-MS_area
-
-```
-
+When we check the projection, we can see the area is down to 9007 x 5736 pixels, that are 1 layer deep, and that we have the Interrupted Goode Homolosine  Coordinate reference system.  
 Plot the blank Spatraster using the ggplot for the MS_area. Unlike the vector files which show empty counties with no values, the raster shows total values of each grid in the default color pallette. 
 
 ```{r}
 ggplot() +
-  geom_spatraster(data=MS_area)
+  geom_spatraster(data=MS_Area)
 
 ```
 
@@ -424,17 +442,17 @@ Like shapefiles, the ggplot interface using tidyterra can be used to change the 
 
 ```{r}
 ggplot() +
-  geom_spatraster(data=MS_area) +
+  geom_spatraster(data=MS_Area) +
   scale_fill_gradient(low = "tan", high = "brown")
 
 ```
 
 Change the visual scale using the clamp variable. Everything over the value that you set will display at the value you specify. This code also adds the legend name.
 
-```{r}
-#We are setting 125 Mg C/ha as our upper display limit. Change this value up and down 
+```{r echo=T, results='hide'}
+#We are setting 100 Mg C/ha as our upper display limit. Change this value up and down 
 #and decide if you have a preference 
-clamped_raster <- clamp(MS_area, upper = 125, 
+clamped_raster <- clamp(MS_Area, upper = 100, 
                         #values If FALSE values outside the clamping range become NA, 
                         #if TRUE, they get the extreme values. See what it looks like if  Values=False
                         values = TRUE)
@@ -488,9 +506,7 @@ grid.arrange(crop_plot, SOC_Map, ncol=2)
 
 ## Your Turn
 
-From the [Unified Soils Map](https://daac.ornl.gov/cgi-bin/dsviewer.pl?ds_id=1242)
-
-1) Load in the Unified Soil Map for Soil Clay into the terra package (Unified_NA_Soil_Map_Topsoil_Clay_Fraction.tif)
+1)  Pull the soil clay from the top 5 cm map (in g/kg) from the geodata package: Hint, ?soil_world_vsi if you need more information.
 
 2) Check the file Resolution and Projection, are they the same as the clamped_raster we used? What could the different resolutions mean?
 
@@ -501,8 +517,3 @@ From the [Unified Soils Map](https://daac.ornl.gov/cgi-bin/dsviewer.pl?ds_id=124
 5) Customize and label your raster plot
 
 6) plot it next to the SOC carbon map above
-
-```{r}
-
-
-```
